@@ -45,7 +45,7 @@ function init() {
   // アニメーション処理
   function animate() {
     let requestId = requestAnimationFrame(animate);
-    box.rotation.y += 100;
+    box.rotation.y += 0.1;
     box.position.y += 1;
     render();
   }

@@ -12,7 +12,6 @@ function init() {
     renderer.setSize(width, height); /* ウィンドウサイズの設定 */ 
     renderer.setClearColor(0x000000); /* 背景色の設定 */ 
 
-    renderer.shadowMap.enabled = true;
 
     // シーンを作成 
     const scene = new THREE.Scene(); 
