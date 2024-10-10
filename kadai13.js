@@ -124,8 +124,8 @@ function init() {
 
   function animateJumpUp() {
     if (jumpHeight < 10) {
-      Robot.position.y += 0.5; 
-      jumpHeight += 0.5;
+      Robot.position.y += 0.8; 
+      jumpHeight += 0.8;
       requestAnimationFrame(animateJumpUp);
       render();
     } else {

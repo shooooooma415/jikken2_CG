@@ -47,7 +47,7 @@ function init() {
     scene.add(spotLight);
     
     //環境光
-    const ambientLight = THREE.AmbientLight(0xffffff,0.5);
+    const ambientLight = new THREE.AmbientLight(0xffffff,0.5);
     scene.add(ambientLight);
 
     // 初回実行 
