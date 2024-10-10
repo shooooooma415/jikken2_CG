@@ -16,7 +16,7 @@ function init() {
 
     // カメラを作成 
     const camera = new THREE.PerspectiveCamera(45, width / height);
-    camera.position.set(30, 20, -70);
+    camera.position.set(50, 50, -100);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     const headMaterial = new THREE.MeshStandardMaterial({
@@ -89,19 +89,21 @@ function init() {
 
     const Robot = new THREE.Group();
     Robot.add(Head, Body, Legs, Arms);
+    Robot.position.y = 20; // ロボットの位置を少し上げて地面の上に立たせる
     scene.add(Robot);
 
     let isWalking = false;
     let isJumping = false;
+    let currentLegRotation = 0;
     let legRotationDirection = 1;
     let maxLegRotation = Math.PI / 8;
-    let currentLegRotation = 0;
 
     let velocityY = 0;
     const gravity = -0.05;
     const jumpStrength = 1.5;
 
     document.addEventListener("keydown", onDocumentKeyDown, false);
+    document.addEventListener("mousemove", onDocumentMouseMove, false);
 
     function onDocumentKeyDown(event_k) {
         let keyCode = event_k.which;
@@ -118,19 +120,35 @@ function init() {
         }
     }
 
+    function onDocumentMouseMove(event_m) {
+        // マウスのX座標を画面の中央を基準に計算
+        mouseX = (event_m.clientX / window.innerWidth) * 2 - 1;
+
+        // マウスの位置に基づいて目標の回転角度を計算（-Math.PIからMath.PIの範囲で調整）
+        targetRotation = mouseX * Math.PI;
+    }
+
     function animateLegs() {
         if (isWalking) {
+            // 足の回転アニメーション
             leftLeg.rotation.x += legRotationDirection * 0.05;
             rightLeg.rotation.x -= legRotationDirection * 0.05;
-
             currentLegRotation += 0.05;
+
             if (currentLegRotation >= maxLegRotation || currentLegRotation <= -maxLegRotation) {
                 legRotationDirection *= -1;
                 currentLegRotation = 0;
             }
 
-            render();
-            requestAnimationFrame(animateLegs);
+            // ロボットの回転をマウスの位置に合わせる
+            Robot.rotation.y += (targetRotation - Robot.rotation.y) * 0.05;
+
+            // ロボットの位置を前方に移動（向いている方向に進む）
+            Robot.position.z -= Math.cos(Robot.rotation.y) * 0.1;
+            Robot.position.x -= Math.sin(Robot.rotation.y) * 0.1;
+
+            render(); // 毎フレーム再描画
+            requestAnimationFrame(animateLegs); // 次のフレームをリクエスト
         }
     }
 
@@ -138,8 +156,8 @@ function init() {
         velocityY += gravity;
         Robot.position.y += velocityY;
 
-        if (Robot.position.y <= 0) {
-            Robot.position.y = 0;
+        if (Robot.position.y <= 20) { // 地面の高さに合わせて20に設定
+            Robot.position.y = 20;
             velocityY = 0;
             isJumping = false;
         } else {
