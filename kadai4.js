@@ -42,7 +42,7 @@ function init() {
     //光源設定
 
     // スポット光源 
-    const spotLight = new THREE.SpotLight(0xffffff,1,100,30,0,2); 
+    const spotLight = new THREE.SpotLight(0xffffff,1,100,THREE.Math.degToRad(30),0,2); 
     spotLight.position.set(0, 20, 0); 
     scene.add(spotLight);
     
