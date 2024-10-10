@@ -47,28 +47,27 @@ function init() {
     const mouse = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 1, 3), highlight);
     mouse.position.set(0, -3, -8);
     mouse.rotation.set(Math.PI / 2, Math.PI, 0);
-    scene.add(mouse);
 
     const earRight = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 1, 16), headMaterial);
     earRight.position.set(10, 8, 0);
     earRight.rotation.set(0, 0, Math.PI / 2);
-    scene.add(earRight);
 
     const earLeft = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 1, 16), headMaterial);
     earLeft.position.set(-10, 8, 0);
     earLeft.rotation.set(0, 0, Math.PI / 2);
-    scene.add(earLeft);
 
     const Head = new THREE.Group();
-    Head.add(head, eye1, eye2, mouse, earRight, earLeft)
-    scene.add(Head);
+    Head.add(head, eye1, eye2, mouse, earLeft, earRight);
 
     const body = new THREE.Mesh(new THREE.BoxGeometry(18, 14, 12), bodyMaterial);
     body.position.set(0, -10, 0);
 
     const Body = new THREE.Group();
-    Body.add(body)
+    Body.add(body);
     scene.add(Body);
+
+    Head.position.set(0, 5, 0);
+    scene.add(Head);
 
     const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 20, 16), legMaterial);
     leftLeg.position.set(-6, -20, 0);
@@ -77,22 +76,19 @@ function init() {
     rightLeg.position.set(6, -20, 0);
 
     const Legs = new THREE.Group();
-    Legs.add(leftLeg, rightLeg)
+    Legs.add(leftLeg, rightLeg);
     scene.add(Legs);
 
     const Arms = new THREE.Group();
-
     const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 15, 16), armMaterial);
     leftArm.position.set(-12, -5, 0);
     leftArm.rotation.z = Math.PI / 3;
 
     const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 15, 16), armMaterial);
     rightArm.position.set(12, -5, 0);
-    rightArm.rotation.z = -Math.PI / 3; 
+    rightArm.rotation.z = -Math.PI / 3;
 
-    Arms.add(leftArm);
-    Arms.add(rightArm);
-
+    Arms.add(leftArm, rightArm);
     scene.add(Arms);
 
     // 光源設定
