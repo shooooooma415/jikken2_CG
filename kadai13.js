@@ -91,22 +91,24 @@ function init() {
   Robot.add(Head, Body, Legs, Arms);
   scene.add(Robot);
 
+  let gravity = 0.05; 
+  let initialVelocity = 2;
+  let velocity = initialVelocity;
+  let isJumping = false;
   let isRotating = false;
-  let isJumping = false; 
-  let currentRotation = 0;
-  let jumpHeight = 0;
 
   document.addEventListener("keydown", onDocumentKeyDown, false);
 
   function onDocumentKeyDown(event_k) {
     let keyCode = event_k.which;
-    if (keyCode == 72 && !isRotating) { 
+    if (keyCode == 72 && !isRotating) {
       isRotating = true;
       animateRotation();
     }
-    if (keyCode == 74 && !isJumping && !isRotating) { 
+    if (keyCode == 74 && !isJumping && !isRotating) {
       isJumping = true;
-      animateJumpUp();
+      velocity = initialVelocity; // ジャンプ開始時に速度を初期化
+      animateJump();
     }
   }
 
@@ -122,25 +124,19 @@ function init() {
     }
   }
 
-  function animateJumpUp() {
-    if (jumpHeight < 10) {
-      Robot.position.y += 0.8; 
-      jumpHeight += 0.8;
-      requestAnimationFrame(animateJumpUp);
+  function animateJump() {
+    if (isJumping) {
+      // 上昇フェーズ
+      if (velocity > 0 || Robot.position.y > 0) {
+        Robot.position.y += velocity;
+        velocity -= gravity; // 重力の影響で速度が減少
+        requestAnimationFrame(animateJump);
+      } else {
+        // 下降フェーズ
+        isJumping = false;
+        velocity = initialVelocity; // 速度をリセット
+      }
       render();
-    } else {
-      animateJumpDown(); 
-    }
-  }
-
-  function animateJumpDown() {
-    if (jumpHeight > 0) {
-      Robot.position.y -= 0.5;
-      jumpHeight -= 0.5;
-      requestAnimationFrame(animateJumpDown);
-      render();
-    } else {
-      isJumping = false;
     }
   }
 
