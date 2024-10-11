@@ -2,7 +2,7 @@ window.addEventListener("DOMContentLoaded", init);
 
 function init() {
     const width = 1700;
-    const height = 800;
+    const height = 1000;
 
     // レンダラーを作成 
     const renderer = new THREE.WebGLRenderer({
@@ -16,7 +16,7 @@ function init() {
 
     // カメラを作成 
     const camera = new THREE.PerspectiveCamera(45, width / height);
-    camera.position.set(50, 50, -100);
+    camera.position.set(50, 70, -100);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     const headMaterial = new THREE.MeshNormalMaterial({
