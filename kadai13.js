@@ -4,17 +4,14 @@ function init() {
   const width = 1000;
   const height = 1000;
 
-  // レンダラーを作成 
   const renderer = new THREE.WebGLRenderer({
     canvas: document.querySelector("#myCanvas")
   });
   renderer.setSize(width, height); /* ウィンドウサイズの設定 */
   renderer.setClearColor(0x000000); /* 背景色の設定 */
 
-  // シーンを作成 
   const scene = new THREE.Scene();
 
-  // カメラを作成 
   const camera = new THREE.PerspectiveCamera(45, width / height);
   camera.position.set(0, 0, -70);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -107,7 +104,7 @@ function init() {
     }
     if (keyCode == 74 && !isJumping && !isRotating) {
       isJumping = true;
-      velocity = initialVelocity; // ジャンプ開始時に速度を初期化
+      velocity = initialVelocity;
       animateJump();
     }
   }
@@ -126,15 +123,13 @@ function init() {
 
   function animateJump() {
     if (isJumping) {
-      // 上昇フェーズ
       if (velocity > 0 || Robot.position.y > 0) {
         Robot.position.y += velocity;
-        velocity -= gravity; // 重力の影響で速度が減少
+        velocity -= gravity;
         requestAnimationFrame(animateJump);
       } else {
-        // 下降フェーズ
         isJumping = false;
-        velocity = initialVelocity; // 速度をリセット
+        velocity = initialVelocity;
       }
       render();
     }
@@ -144,7 +139,6 @@ function init() {
     renderer.render(scene, camera);
   }
 
-  // 光源設定
   const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
   directionalLight.position.set(0, 0, 1);
   scene.add(directionalLight);
@@ -152,6 +146,5 @@ function init() {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
   scene.add(ambientLight);
 
-  // 初回レンダリング 
   render();
 }
