@@ -201,8 +201,8 @@ function init() {
             Robot.rotation.y += (targetRotation - Robot.rotation.y) * 0.05;
 
             // ロボットの移動
-            Robot.position.z -= Math.cos(Robot.rotation.y) * 0.2;
-            Robot.position.x -= Math.sin(Robot.rotation.y) * 0.2;
+            Robot.position.z -= Math.cos(Robot.rotation.y) * 0.05;
+            Robot.position.x -= Math.sin(Robot.rotation.y) * 0.05;
 
             render();
             requestAnimationFrame(animateLegsAndArms);
