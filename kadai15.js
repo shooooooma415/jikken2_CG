@@ -1,8 +1,8 @@
 window.addEventListener("DOMContentLoaded", init);
 
 function init() {
-    const width = 1000;
-    const height = 1000;
+    const width = 1700;
+    const height = 800;
 
     // レンダラーを作成 
     const renderer = new THREE.WebGLRenderer({
@@ -38,10 +38,13 @@ function init() {
         color: 0xffff00
     });
     const cannonMaterial = new THREE.MeshStandardMaterial({
-        color: 0x555555 // 大砲用の材料
+        color: 0x555555
     });
     const bulletMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff0000 // 弾丸用の材料
+        color: 0xff0000
+    });
+    const swordMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff
     });
 
     // 頭の作成
@@ -73,8 +76,8 @@ function init() {
 
     // 大砲の作成
     const cannon = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 10, 32), cannonMaterial);
-    cannon.position.set(0, -4, 6); // 大砲を胴体の前方に配置
-    cannon.rotation.set(Math.PI / 2, 0, 0); // 大砲の向きを調整
+    cannon.position.set(0, -10, -6);
+    cannon.rotation.set(Math.PI / 2, 0, 0);
 
     const Body = new THREE.Group();
     Body.add(body, cannon);
@@ -119,6 +122,10 @@ function init() {
 
     let bullets = [];
 
+    let sword = null;
+    let isSwordEquipped = false;
+    let isTalking = false;
+
     document.addEventListener("keydown", onDocumentKeyDown, false);
     document.addEventListener("mousemove", onDocumentMouseMove, false);
 
@@ -137,6 +144,13 @@ function init() {
         }
         if (keyCode == 65) {
             fireBullet();
+        }
+        if (keyCode === 83) {
+            equipSword();
+            startTalking();
+        }
+        if (keyCode === 32) {
+            swingSword(); // スペースキーで剣を振る
         }
     }
 
@@ -191,25 +205,69 @@ function init() {
 
     function fireBullet() {
         const bullet = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), bulletMaterial);
-        bullet.position.set(
-            Robot.position.x + Math.sin(Robot.rotation.y) * 6, 
-            Robot.position.y - 4, 
-            Robot.position.z + Math.cos(Robot.rotation.y) * 6
-        ); // 大砲の位置から発射
+        const initialPosition = {
+            x: Robot.position.x - Math.sin(Robot.rotation.y) * 6,
+            y: Robot.position.y - 10,
+            z: Robot.position.z - Math.cos(Robot.rotation.y) * 6,
+        };
+
+        const initialDirection = {
+            x: -Math.sin(Robot.rotation.y),
+            z: -Math.cos(Robot.rotation.y),
+        };
+
+        bullet.position.set(initialPosition.x, initialPosition.y, initialPosition.z);
+        bullet.userData = { direction: initialDirection };
         bullets.push(bullet);
         scene.add(bullet);
     }
 
     function animateBullets() {
         bullets.forEach(bullet => {
-            bullet.position.z += Math.cos(Robot.rotation.y) * 0.5;
-            bullet.position.x += Math.sin(Robot.rotation.y) * 0.5; // 弾を前方に進める
+            const direction = bullet.userData.direction;
+            bullet.position.x += direction.x * 0.5;
+            bullet.position.z += direction.z * 0.5;
         });
 
         bullets = bullets.filter(bullet => bullet.position.z < 100 && bullet.position.x < 100); // 画面外に出た弾を削除
 
         render();
         requestAnimationFrame(animateBullets);
+    }
+
+    function equipSword() {
+        if (!isSwordEquipped) {
+            const swordGeometry = new THREE.BoxGeometry(3, 30, 2);
+            swordGeometry.translate(0, 15, 0);
+    
+            sword = new THREE.Mesh(swordGeometry, swordMaterial);
+            sword.position.set(18, -2, 0);
+            sword.rotation.z = -Math.PI / 4;
+            Arms.add(sword);
+            isSwordEquipped = true;
+        }else{
+            Arms.remove(sword);
+            isSwordEquipped = false;
+        }
+    }
+
+    function swingSword() {
+        if (isSwordEquipped) {
+            let swingAngle = Math.PI / 2;
+            const swingSpeed = 0.1;
+
+            function animateSwing() {
+                if (swingAngle > 0) {
+                    sword.rotation.x -= swingSpeed;
+                    swingAngle -= swingSpeed;
+                    render();
+                    requestAnimationFrame(animateSwing);
+                } else {
+                    sword.rotation.x = 0; 
+                }
+            }
+            animateSwing();
+        }
     }
 
     function render() {
@@ -221,7 +279,7 @@ function init() {
     directionalLight.position.set(0, 0, 1);
     scene.add(directionalLight);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
 
     // 弾丸アニメーションを開始
