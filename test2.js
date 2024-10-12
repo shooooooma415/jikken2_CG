@@ -19,33 +19,15 @@ function init() {
     camera.position.set(50, 70, -100);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    const headMaterial = new THREE.MeshNormalMaterial({
-        color: 0xff0000
-    });
-    const eyesMaterial = new THREE.MeshStandardMaterial({
-        color: 0x00ff46
-    });
-    const mouseMaterial = new THREE.MeshStandardMaterial({
-        color: 0x464646
-    });
-    const bodyMaterial = new THREE.MeshStandardMaterial({
-        color: 0x00ffff
-    });
-    const legMaterial = new THREE.MeshStandardMaterial({
-        color: 0x0000ff
-    });
-    const armMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffff00
-    });
-    const cannonMaterial = new THREE.MeshStandardMaterial({
-        color: 0x555555
-    });
-    const bulletMaterial = new THREE.MeshStandardMaterial({
-        color: 0xff0000
-    });
-    const swordMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff
-    });
+    const headMaterial = new THREE.MeshNormalMaterial({ color: 0xff0000 });
+    const eyesMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff46 });
+    const mouseMaterial = new THREE.MeshStandardMaterial({ color: 0x464646 });
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffff });
+    const legMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff });
+    const armMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
+    const cannonMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
+    const bulletMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    const swordMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
     // 頭の作成
     const head = new THREE.Mesh(new THREE.BoxGeometry(20, 16, 16), headMaterial);
@@ -161,26 +143,29 @@ function init() {
     function onResults(results) {
         if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
             const handLandmarks = results.multiHandLandmarks[0];
+            const handX = handLandmarks[0].x; // 手首のX座標を取得
 
             const isFist = handLandmarks[8].y > handLandmarks[6].y && handLandmarks[12].y > handLandmarks[10].y;
             const isOpenHand = handLandmarks[8].y < handLandmarks[6].y && handLandmarks[12].y < handLandmarks[10].y;
 
             if (isFist) {
                 isWalking = true;
+
+                // 画面の左半分か右半分かを判定し、進行方向を変更
+                if (handX < 0.5) { 
+                    // 左半分：左回転
+                    targetRotation = Math.PI / 2;
+                } else {
+                    // 右半分：右回転
+                    targetRotation = -Math.PI / 2;
+                }
+
                 animateLegsAndArms();
             } else if (isOpenHand) {
                 isWalking = false;
             }
         }
         renderer.render(scene, camera);
-    }
-
-    // マウスの動きに基づいてロボットの向きを変える
-    document.addEventListener("mousemove", onMouseMove);
-
-    function onMouseMove(event) {
-        const mouseX = (event.clientX / window.innerWidth) * 2 - 1; // -1から1の範囲に変換
-        targetRotation = mouseX * Math.PI; // X座標に基づく目標回転角度
     }
 
     function animateLegsAndArms() {
@@ -197,7 +182,7 @@ function init() {
                 currentLegRotation = 0;
             }
 
-            // マウスによる回転制御
+            // 進行方向に合わせてロボットを回転
             Robot.rotation.y += (targetRotation - Robot.rotation.y) * 0.05;
 
             // ロボットの移動
@@ -237,87 +222,6 @@ function init() {
         }
     }
 
-    function animateJump() {
-        velocityY += gravity;
-        Robot.position.y += velocityY;
-
-        if (Robot.position.y <= 20) {
-            Robot.position.y = 20;
-            velocityY = 0;
-            isJumping = false;
-        } else {
-            requestAnimationFrame(animateJump);
-        }
-        render();
-    }
-
-    function fireBullet() {
-        const bullet = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), bulletMaterial);
-        const initialPosition = {
-            x: Robot.position.x - Math.sin(Robot.rotation.y) * 6,
-            y: Robot.position.y - 10,
-            z: Robot.position.z - Math.cos(Robot.rotation.y) * 6,
-        };
-
-        const initialDirection = {
-            x: -Math.sin(Robot.rotation.y),
-            z: -Math.cos(Robot.rotation.y),
-        };
-
-        bullet.position.set(initialPosition.x, initialPosition.y, initialPosition.z);
-        bullet.userData = { direction: initialDirection };
-        bullets.push(bullet);
-        scene.add(bullet);
-    }
-
-    function animateBullets() {
-        bullets.forEach(bullet => {
-            const direction = bullet.userData.direction;
-            bullet.position.x += direction.x * 0.5;
-            bullet.position.z += direction.z * 0.5;
-        });
-
-        bullets = bullets.filter(bullet => bullet.position.z < 100 && bullet.position.x < 100); // 画面外に出た弾を削除
-
-        render();
-        requestAnimationFrame(animateBullets);
-    }
-
-    function equipSword() {
-        if (!isSwordEquipped) {
-            const swordGeometry = new THREE.BoxGeometry(3, 30, 2);
-            swordGeometry.translate(0, 15, 0);
-
-            sword = new THREE.Mesh(swordGeometry, swordMaterial);
-            sword.position.set(18, -2, 0);
-            sword.rotation.z = -Math.PI / 4;
-            Arms.add(sword);
-            isSwordEquipped = true;
-        } else {
-            Arms.remove(sword);
-            isSwordEquipped = false;
-        }
-    }
-
-    function swingSword() {
-        if (isSwordEquipped) {
-            let swingAngle = Math.PI / 2;
-            const swingSpeed = 0.1;
-
-            function animateSwing() {
-                if (swingAngle > 0) {
-                    sword.rotation.x -= swingSpeed;
-                    swingAngle -= swingSpeed;
-                    render();
-                    requestAnimationFrame(animateSwing);
-                } else {
-                    sword.rotation.x = 0;
-                }
-            }
-            animateSwing();
-        }
-    }
-
     function resetRobotPosition() {
         const initialPosition = { x: Robot.position.x, y: Robot.position.y, z: Robot.position.z };
         const targetPosition = { x: 0, y: 20, z: 0 };
@@ -344,8 +248,6 @@ function init() {
         requestAnimationFrame(animateReset);
     }
 
-
-
     function render() {
         renderer.render(scene, camera);
     }
@@ -357,8 +259,6 @@ function init() {
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
-
-    animateBullets();
 
     render();
 }
